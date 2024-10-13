@@ -55,9 +55,10 @@ class RAGService:
         logger.info("Initialized RAG service.")
 
     def handle_query(self, query):
-        return self.qa_chain.invoke(query)
+        rag_response = self.qa_chain.invoke(query)
+        logger.info(f"\n\n>>RAG response: {rag_response}\n\n")
+        return rag_response
 
-# 2. Routing Agent to decide between RAG or simple LLM
 
 
 class RoutingAgent:
