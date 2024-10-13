@@ -1,4 +1,5 @@
 import json
+import json
 import os
 import logging
 from typing import Literal
@@ -76,40 +77,66 @@ class RoutingAgent:
 
     def route_query(self, query):
         formatted_prompt = self.route_prompt.format(question=query)
-        response = self.llm_router.invoke(formatted_prompt)  # Get the AI response
+        response = self.llm_router.invoke(
+            formatted_prompt)  # Get the AI response
 
         # Attempt to parse the response content as JSON
         try:
             route_decision = json.loads(response.content)
             datasource = route_decision.get('datasource')
             if datasource == "vectorstore":
-                logger.info("\n\n>>> RAG tool was invoked for the query: %s", query)
-                return self.rag_service.handle_query(query)
+                logger.info("RAG tool was invoked for the query: %s", query)
+                # Now we return the retrieved context instead of a final response
+                retrieved_context = self.rag_service.handle_query(query)
+                return {'query': query, 'retrieved_context': retrieved_context}
             else:
                 logger.info(
-                    "\n\n>>> Default LLM generation was used for the query: %s", query)
-                return self.llm(query)
+                    "Default LLM generation was used for the query: %s", query)
+                # If not vectorstore, use LLM and return the generated result (no context)
+                generated_result = self.llm(query)
+                return {'query': query, 'retrieved_context': generated_result}
         except json.JSONDecodeError:
             logger.error("Failed to parse the routing decision as JSON.")
             return "Sorry, there was an error processing your request."
 
 
-# 3. Future placeholder: Final model router for weak/strong model logic
-
-
-class FinalModelRouter:
+# 3. Final Model Agent to select between weak/strong models
+class FinalModelAgent:
     def __init__(self):
-        # Placeholder for routing between weak and strong models
+        # Simulate weak and strong models for now
         self.weak_model = OpenAI(temperature=0.7)  # Example weak model
         self.strong_model = OpenAI(temperature=0)  # Example strong model
 
-    def route_model(self, query_complexity):
-        if query_complexity == "simple":
-            return self.weak_model
+    def assess_query_complexity(self, query):
+        """
+        Simulate assessing the query complexity.
+        For now, we'll assume any query longer than 10 words is 'complex' and short queries are 'simple'.
+        """
+        if len(query.split()) > 10:
+            return "complex"
         else:
-            return self.strong_model
+            return "simple"
+
+    def route_model(self, query, context):
+        """
+        Route between weak and strong models using the user query and the retrieved context.
+        """
+        query_complexity = self.assess_query_complexity(query)
+
+        # Combine the query and context into one final prompt
+        final_prompt = f"Query: {query}\nContext: {context.get('result', 'No context')}"
+
+        if query_complexity == "simple":
+            logger.info("Using weak model for further processing.")
+            # Pass combined query + context to the model
+            return self.weak_model.invoke(final_prompt)
+        else:
+            logger.info("Using strong model for further processing.")
+            # Pass combined query + context to the model
+            return self.strong_model.invoke(final_prompt)
 
 
+# Main function integrating RoutingAgent and FinalModelAgent
 def main():
     # Ensure API key is set
     openai_api_key = os.getenv("OPENAI_API_KEY")
@@ -118,8 +145,9 @@ def main():
 
     logger.info("Starting the agent...")
 
-    # Initialize routing agent
+    # Initialize routing agent and final model agent
     routing_agent = RoutingAgent(openai_api_key)
+    final_model_agent = FinalModelAgent()  # Initialize the final model agent
 
     # Agent loop
     while True:
@@ -128,9 +156,14 @@ def main():
             logger.info("Agent terminated by user.")
             break
 
-        # Route the query through the routing agent
-        answer = routing_agent.route_query(query)
-        print("Answer:", answer)
+        # Route the query through the routing agent first
+        routing_response = routing_agent.route_query(query)
+        query = routing_response.get('query')
+        retrieved_context = routing_response.get('retrieved_context')
+
+        # Hand off the user query and retrieved context to the final model agent
+        final_answer = final_model_agent.route_model(query, retrieved_context)
+        print("Final Model Agent Answer:", final_answer)
 
 
 if __name__ == "__main__":
