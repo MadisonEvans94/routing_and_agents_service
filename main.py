@@ -1,6 +1,6 @@
 import logging
 from langgraph.graph import StateGraph, START, END
-from agents.routing_agent import RoutingAgent
+from agents.rag_agent import RAGAgent
 from agents.final_model_agent import FinalModelAgent
 from typing import Dict, Any
 from dotenv import load_dotenv  # Import dotenv to load environment variables
@@ -45,7 +45,7 @@ def main():
 
     # Initialize the agents globally
     global routing_agent, final_model_agent
-    routing_agent = RoutingAgent(openai_api_key)
+    routing_agent = RAGAgent(openai_api_key)
     final_model_agent = FinalModelAgent()
 
     # Initialize LangGraph StateGraph

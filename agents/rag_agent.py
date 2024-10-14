@@ -9,7 +9,7 @@ from agents.rag_service import RAGService
 logger = logging.getLogger(__name__)
 
 
-class RoutingAgent:
+class RAGAgent:
     def __init__(self, openai_api_key: str):
         # Initialize the LLM router
         self.llm_router = ChatOpenAI(temperature=0)
