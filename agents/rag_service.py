@@ -44,4 +44,4 @@ class RAGService:
         # raw_context = "\n\n".join([doc.page_content for doc in raw_docs])
         # logger.info(f"Retrieved context: {raw_context}")
         # return raw_context
-        return self.retriever.get_relevant_documents(query)
+        return self.retriever.invoke(query)
