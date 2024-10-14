@@ -1,7 +1,7 @@
 import logging
 from langgraph.graph import StateGraph, START, END
 from agents.rag_agent import RAGAgent
-from agents.final_model_agent import FinalModelAgent
+from agents.model_routing_agent import ModelRoutingAgent
 from typing import Dict, Any
 from dotenv import load_dotenv  # Import dotenv to load environment variables
 import os
@@ -46,19 +46,19 @@ def main():
     # Initialize the agents globally
     global routing_agent, final_model_agent
     routing_agent = RAGAgent(openai_api_key)
-    final_model_agent = FinalModelAgent()
+    final_model_agent = ModelRoutingAgent()
 
     # Initialize LangGraph StateGraph
     workflow = StateGraph(GraphState)
 
     # Add nodes to the workflow
-    workflow.add_node("RoutingAgent", routing_agent_node)
-    workflow.add_node("FinalModelAgent", final_model_agent_node)
+    workflow.add_node("RAGAgent", routing_agent_node)
+    workflow.add_node("ModelRoutingAgent", final_model_agent_node)
 
     # Add edges between nodes
-    workflow.add_edge(START, "RoutingAgent")
-    workflow.add_edge("RoutingAgent", "FinalModelAgent")
-    workflow.add_edge("FinalModelAgent", END)
+    workflow.add_edge(START, "RAGAgent")
+    workflow.add_edge("RAGAgent", "ModelRoutingAgent")
+    workflow.add_edge("ModelRoutingAgent", END)
 
     # Compile and run the graph
     graph_app = workflow.compile()

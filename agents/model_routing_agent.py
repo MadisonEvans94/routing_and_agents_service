@@ -7,7 +7,7 @@ from langchain.prompts import PromptTemplate
 logger = logging.getLogger(__name__)
 
 
-class FinalModelAgent:
+class ModelRoutingAgent:
     def __init__(self):
         # Initialize weak and strong models
         self.weak_model = OpenAI(temperature=0.7)
