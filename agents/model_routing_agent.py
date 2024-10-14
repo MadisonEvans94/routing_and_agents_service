@@ -38,8 +38,8 @@ class ModelRoutingAgent:
         # Route between weak and strong models based on query complexity
         query_complexity = self.assess_query_complexity(query)
         if query_complexity == "simple":
-            logger.info(f"Using weak model for query: {query}")
+            logger.info(f">>> Using weak model")
             return self.weak_model.invoke(final_prompt)
         else:
-            logger.info(f"Using strong model for query: {query}")
+            logger.info(f">>> Using strong model")
             return self.strong_model.invoke(final_prompt)

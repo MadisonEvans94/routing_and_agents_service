@@ -82,13 +82,13 @@ def main(plot):
             img.show()
         except Exception as e:
             logger.warning(
-                f"Graph visualization requires additional dependencies or there was an issue: {e}")
+                f">>> Graph visualization requires additional dependencies or there was an issue: {e}")
 
     # Main loop for user interaction
     while True:
         query = input("Enter your question (or 'quit' to exit): ")
         if query.lower() == 'quit':
-            logger.info("Agent terminated by user.")
+            logger.info(">>> Agent terminated by user.")
             break
 
         # Run the graph with the user query

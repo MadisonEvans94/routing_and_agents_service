@@ -34,11 +34,11 @@ class RAGAgent:
             route_decision = json.loads(response.content)
             datasource = route_decision.get('datasource')
             if datasource == "vectorstore":
-                logger.info(f"RAG tool invoked for query: {query}")
+                logger.info(f">>> RAG tool invoked. Performing retrieval on vectorstore")
                 return self.rag_service.handle_query(query)
             else:
-                logger.info(f"Default LLM used for query: {query}")
+                logger.info(f">>> Default LLM used. No RAG required")
                 return self.llm.invoke(query)
         except json.JSONDecodeError as e:
-            logger.error(f"Failed to parse routing decision: {str(e)}")
+            logger.error(f">>> Failed to parse routing decision: {str(e)}")
             return "Error in routing decision"
